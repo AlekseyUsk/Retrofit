@@ -15,4 +15,8 @@ interface MainApi {
     // запрос аутефикации username и password
     @POST("auth/login")
     suspend fun auth(@Body authRequest: AuthRequest): User
+
+    //получить все продукты
+    @GET("products")
+    suspend fun getAllProducts(): Products
 }
