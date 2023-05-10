@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Query
 
 interface MainApi {
     //запрос одного продукта
@@ -19,4 +20,9 @@ interface MainApi {
     //получить все продукты
     @GET("products")
     suspend fun getAllProducts(): Products
+
+    //поиск продукта по https://dummyjson.com/products/search?q=phone
+    // search и q
+    @GET("products/search")
+    suspend fun getProductsByName(@Query("q") name : String): Products
 }

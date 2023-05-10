@@ -2,6 +2,7 @@ package com.bignerdranch.android.retrofit
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.retrofit.adapter.ProductAdapter
 import com.bignerdranch.android.retrofit.databinding.ActivityMainBinding
@@ -35,14 +36,27 @@ class MainActivity : AppCompatActivity() {
         ).build()
         val mainApi = retrofit.build().create(MainApi::class.java)
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val objectProductsList =
-                mainApi.getAllProducts() //получаем мой обьект со списком продуктов с сервера
-            runOnUiThread {
-                binding.apply {
-                    adapter.submitList(objectProductsList.products) //передаем в адаптер полученный список
-                }
+        //Search view
+        binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                //когда человек ввел слово для поиска нажал поиск слово передается
+                return true
             }
-        }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                //когда человек вводит слово для поиска то в процессе уже находит
+                CoroutineScope(Dispatchers.IO).launch {
+                    val objectProductsList = newText?.let { mainApi.getProductsByName(it) }
+                    runOnUiThread {
+                        binding.apply {
+                            if (objectProductsList != null) {
+                                adapter.submitList(objectProductsList.products)
+                            }
+                        }
+                    }
+                }
+                return true
+            }
+        })
     }
 }
