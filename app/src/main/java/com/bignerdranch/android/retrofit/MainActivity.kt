@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.retrofit.adapter.ProductAdapter
 import com.bignerdranch.android.retrofit.databinding.ActivityMainBinding
 import com.bignerdranch.android.retrofit.retrofit.MainApi
+import com.bignerdranch.android.retrofit.retrofit.authentication.AuthRequest
+import com.bignerdranch.android.retrofit.retrofit.authentication.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,6 +38,17 @@ class MainActivity : AppCompatActivity() {
         ).build()
         val mainApi = retrofit.build().create(MainApi::class.java)
 
+        //Todo получаем пользователя и его токен по паролю и имени
+        var user: User? = null  //user это дата класс получения данных который я ранее создавал
+        CoroutineScope(Dispatchers.IO).launch {
+            user = mainApi.auth(
+                AuthRequest(
+                    "kminchelle",
+                    "0lelplR"
+                )
+            )
+        }
+        //Todo передал этого user с его token в запрос
         //Search view
         binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -46,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextChange(newText: String?): Boolean {
                 //когда человек вводит слово для поиска то в процессе уже находит
                 CoroutineScope(Dispatchers.IO).launch {
-                    val objectProductsList = newText?.let { mainApi.getProductsByName(it) }
+                    val objectProductsList = newText?.let { mainApi.getProductsByNameAuth(user?.token ?: "",it) } //Add user и token
                     runOnUiThread {
                         binding.apply {
                             if (objectProductsList != null) {

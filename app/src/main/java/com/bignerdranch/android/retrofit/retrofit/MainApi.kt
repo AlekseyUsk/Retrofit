@@ -2,15 +2,11 @@ package com.bignerdranch.android.retrofit.retrofit
 
 import com.bignerdranch.android.retrofit.retrofit.authentication.AuthRequest
 import com.bignerdranch.android.retrofit.retrofit.authentication.User
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Part
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface MainApi {
     //запрос одного продукта
-    @GET("products/{id}")
+    @GET("auth/products/{id}")
     suspend fun getProductById(@Part("id") id: Int): Product
 
     // запрос аутефикации username и password
@@ -18,11 +14,12 @@ interface MainApi {
     suspend fun auth(@Body authRequest: AuthRequest): User
 
     //получить все продукты
-    @GET("products")
+    @GET("auth/products")
     suspend fun getAllProducts(): Products
 
     //поиск продукта по https://dummyjson.com/products/search?q=phone
     // search и q
-    @GET("products/search")
-    suspend fun getProductsByName(@Query("q") name : String): Products
+    @Headers("Content-Type': 'application/json")   //добавил статичиский @Headers и в низу кода динамический и передал токен
+    @GET("auth/products/search")  //add auth/
+    suspend fun getProductsByNameAuth(@Header("Authorization") token : String,@Query("q") name : String): Products
 }
