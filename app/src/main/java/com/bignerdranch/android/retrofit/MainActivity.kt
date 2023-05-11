@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        supportActionBar?.title = "Гость"
+
         // Todo Подключаем Адаптер к Recycler view
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         val adapter = ProductAdapter() //проинициализировал адаптер
@@ -47,6 +49,9 @@ class MainActivity : AppCompatActivity() {
                     "0lelplR"
                 )
             )
+            runOnUiThread {
+                supportActionBar?.title = user?.firstName
+            }
         }
         //Todo передал этого user с его token в запрос
         //Search view
@@ -59,7 +64,12 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextChange(newText: String?): Boolean {
                 //когда человек вводит слово для поиска то в процессе уже находит
                 CoroutineScope(Dispatchers.IO).launch {
-                    val objectProductsList = newText?.let { mainApi.getProductsByNameAuth(user?.token ?: "",it) } //Add user и token
+                    val objectProductsList = newText?.let {
+                        mainApi.getProductsByNameAuth(
+                            user?.token ?: "",
+                            it
+                        )
+                    } //Add user и token
                     runOnUiThread {
                         binding.apply {
                             if (objectProductsList != null) {
