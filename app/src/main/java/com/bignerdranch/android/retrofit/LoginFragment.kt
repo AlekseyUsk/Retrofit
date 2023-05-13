@@ -1,6 +1,7 @@
 package com.bignerdranch.android.retrofit
 
 import android.os.Bundle
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import com.bignerdranch.android.retrofit.databinding.FragmentLoginBinding
 import com.bignerdranch.android.retrofit.retrofit.MainApi
 import com.bignerdranch.android.retrofit.retrofit.authentication.AuthRequest
 import com.bignerdranch.android.retrofit.viewmodel.LoginViewModel
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,9 +62,20 @@ class LoginFragment : Fragment() {
     private fun auth(authRequest: AuthRequest) {
         CoroutineScope(Dispatchers.IO).launch {
             val response = mainApi.auth(authRequest)
-            val message = response.errorBody()?.string().let { JSONObject(it).getString("message") }
+            val message = response.errorBody()?.string().let {
+                if (it != null) {
+                    JSONObject(it).getString("message")
+                }
+            }
             requireActivity().runOnUiThread {
                 binding.textErorr.text = message.toString()
+                val user = response.body()
+                if (user != null){
+                    Picasso.get().load(user.image).into(binding.imageView)
+                    binding.name.text = user.firstName
+                    binding.buttonNext.visibility = View.VISIBLE
+                    viewModel.token.value = user.token
+                }
             }
         }
     }
