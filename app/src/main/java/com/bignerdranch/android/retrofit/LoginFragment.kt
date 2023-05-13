@@ -8,12 +8,23 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.bignerdranch.android.retrofit.databinding.FragmentLoginBinding
+import com.bignerdranch.android.retrofit.retrofit.MainApi
+import com.bignerdranch.android.retrofit.retrofit.authentication.AuthRequest
 import com.bignerdranch.android.retrofit.viewmodel.LoginViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginFragment : Fragment() {
 
     private lateinit var binding: FragmentLoginBinding
-    private val viewModel : LoginViewModel by activityViewModels()
+    private val viewModel: LoginViewModel by activityViewModels()
+    private lateinit var mainApi: MainApi
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,10 +36,51 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initRetrofit()
 
-        binding.buttonNext.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_productsFragment)
-            viewModel.token.value = ""
+        onClick()
+    }
+
+    private fun initRetrofit() {
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
+        val client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
+
+        val retrofit = Retrofit.Builder()
+        retrofit.baseUrl("https://dummyjson.com")
+        retrofit.addConverterFactory(
+            GsonConverterFactory.create()
+        ).build()
+        mainApi = retrofit.build().create(MainApi::class.java)
+    }
+
+    //АВТОРИТИЗАЦИЯ
+    private fun auth(authRequest: AuthRequest) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val response = mainApi.auth(authRequest)
+            val message = response.errorBody()?.string().let { JSONObject(it).getString("message") }
+            requireActivity().runOnUiThread {
+                binding.textErorr.text = message.toString()
+            }
+        }
+    }
+
+    private fun onClick() {
+        binding.apply {
+            buttonNext.setOnClickListener {
+                findNavController().navigate(R.id.action_loginFragment_to_productsFragment)
+
+            }
+            buttonOk.setOnClickListener {
+                auth(
+                    AuthRequest(
+                        login.text.toString(),
+                        password.text.toString()
+                    )
+                )
+            }
         }
     }
 }

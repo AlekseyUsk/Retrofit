@@ -2,6 +2,7 @@ package com.bignerdranch.android.retrofit.retrofit
 
 import com.bignerdranch.android.retrofit.retrofit.authentication.AuthRequest
 import com.bignerdranch.android.retrofit.retrofit.authentication.User
+import retrofit2.Response
 import retrofit2.http.*
 
 interface MainApi {
@@ -11,7 +12,7 @@ interface MainApi {
 
     // запрос аутефикации username и password
     @POST("auth/login")
-    suspend fun auth(@Body authRequest: AuthRequest): User
+    suspend fun auth(@Body authRequest: AuthRequest): Response<User>
 
     //получить все продукты
     @GET("auth/products")

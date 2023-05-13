@@ -27,49 +27,32 @@ class MainActivity : AppCompatActivity() {
 
         supportActionBar?.title = "Гость"
 
-        // Todo Подключаем Адаптер к Recycler view
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = ProductAdapter() //проинициализировал адаптер
-        binding.recyclerView.adapter = adapter //передал адаптер который проиницилиазировал
+        val adapter = ProductAdapter()
+        binding.recyclerView.adapter = adapter
 
-        // Todo подключаем Retrofit и делай запрос натполучение всех продуктов
         val retrofit = Retrofit.Builder()
-        retrofit.baseUrl("https://dummyjson.com")  //указываем url домена
+        retrofit.baseUrl("https://dummyjson.com")
         retrofit.addConverterFactory(
             GsonConverterFactory.create()
         ).build()
         val mainApi = retrofit.build().create(MainApi::class.java)
 
-        //Todo получаем пользователя и его токен по паролю и имени
         var user: User? = null  //user это дата класс получения данных который я ранее создавал
-        CoroutineScope(Dispatchers.IO).launch {
-            user = mainApi.auth(
-                AuthRequest(
-                    "kminchelle",
-                    "0lelplR"
-                )
-            )
-            runOnUiThread {
-                supportActionBar?.title = user?.firstName
-            }
-        }
-        //Todo передал этого user с его token в запрос
-        //Search view
+
         binding.searchView.setOnQueryTextListener(object : OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                //когда человек ввел слово для поиска нажал поиск слово передается
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                //когда человек вводит слово для поиска то в процессе уже находит
                 CoroutineScope(Dispatchers.IO).launch {
                     val objectProductsList = newText?.let {
                         mainApi.getProductsByNameAuth(
                             user?.token ?: "",
                             it
                         )
-                    } //Add user и token
+                    }
                     runOnUiThread {
                         binding.apply {
                             if (objectProductsList != null) {
