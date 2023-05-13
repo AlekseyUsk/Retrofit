@@ -14,9 +14,9 @@ interface MainApi {
     @POST("auth/login")
     suspend fun auth(@Body authRequest: AuthRequest): Response<User>
 
-    //получить все продукты
+    @Headers("Content-Type': 'application/json")
     @GET("auth/products")
-    suspend fun getAllProducts(): Products
+    suspend fun getAllProducts(@Header("Authorization") token : String): Products
 
     //поиск продукта по https://dummyjson.com/products/search?q=phone
     // search и q
